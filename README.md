@@ -1,71 +1,222 @@
-# 灵境 · Python AI 实验项目
+# Lingjing Garbage Classification
 
-实验组第一阶段考核项目，使用 NumPy、Pandas、Matplotlib 和 PyTorch。项目要求手动编写 Residual Block、组装 ResNet，并完成训练、模型保存以及新图片分类预测。
+灵境竞赛组后端 AI 方向第一阶段考核项目。
 
-当前仅准备项目目录、文档和空的 Python 文件，尚未实现业务功能。
+本项目基于 TrashNet 垃圾分类数据集，使用 Python、NumPy、Pandas、Matplotlib 和 PyTorch 完成数据分析、数据加载、手写 ResNet、模型训练与验证、模型保存以及垃圾图片分类预测。
 
-## 考核目标（待实现）
+## 1. 项目内容
 
-1. 手动编写 Residual Block（残差块）。
-2. 使用手写残差块组装 ResNet 图像分类模型。
-3. 完成模型训练。
-4. 保存训练后的模型。
-5. 加载已保存的模型，对新图片进行分类预测。
+项目主要实现：
 
-## 目录结构
+- 使用 NumPy、Pandas、Matplotlib 对垃圾数据集进行统计和可视化
+- 使用 ImageFolder 和 DataLoader 完成图片读取与批量加载
+- 将数据集划分为训练集和验证集
+- 手动实现 ResidualBlock
+- 手动组装 ResNet 图像分类网络
+- 使用 CrossEntropyLoss 和 Adam 完成模型训练
+- 在验证集上评估模型并保存最佳模型
+- 绘制 Loss 和 Accuracy 曲线
+- 加载训练好的模型进行图片分类预测
+- 支持通过命令行输入新的图片进行预测
+
+## 2. 数据集
+
+项目使用 TrashNet 数据集，共 2527 张图片，包含 6 个类别：
+
+| Class | Count |
+| --- | ---: |
+| cardboard | 403 |
+| glass | 501 |
+| metal | 410 |
+| paper | 594 |
+| plastic | 482 |
+| trash | 137 |
+
+训练集与验证集划分：
+
+```text
+Train: 2022
+Validation: 505
+```
+
+原始数据集未上传至 GitHub。
+
+## 3. 项目结构
 
 ```text
 lingjing/
-├── data/                 # 原始数据与处理后的数据
-│   └── .gitkeep          # 保留空目录
-├── src/                  # 以下 Python 文件当前均为空
-│   ├── .gitkeep
-│   ├── data_analysis.py  # 数据分析与可视化
-│   ├── dataset.py        # 数据集加载与图片预处理
-│   ├── model.py          # 手写 Residual Block 与 ResNet 组装
-│   ├── train.py          # 模型训练与保存
-│   └── predict.py        # 模型加载与新图片分类预测
-├── outputs/              # 实验生成的模型、图表与评估结果
-│   └── .gitkeep
-├── README.md             # 项目说明与环境准备方法
-├── requirements.txt      # Python 依赖
-└── .gitignore            # Git 忽略规则
+├── data/
+│   ├── cardboard/
+│   ├── glass/
+│   ├── metal/
+│   ├── paper/
+│   ├── plastic/
+│   └── trash/
+│
+├── src/
+│   ├── data_analysis.py
+│   ├── dataset.py
+│   ├── model.py
+│   ├── train.py
+│   └── predict.py
+│
+├── test_images/
+│   └── test.jpg
+│
+├── outputs/
+├── README.md
+├── requirements.txt
+├── requirements-lock.txt
+└── .gitignore
 ```
 
-## 环境准备
+文件说明：
 
-建议使用 Python 3.10 或更新版本，并为本项目创建独立的虚拟环境。
+```text
+data_analysis.py  数据统计与可视化
+dataset.py        图片预处理、数据集划分与 DataLoader
+model.py          手写 ResidualBlock 和 ResNet
+train.py          模型训练、验证、保存与训练曲线
+predict.py        加载模型并预测指定图片
+```
 
-在项目根目录打开 PowerShell，执行：
+## 4. 模型
+
+项目主体模型为手动实现的 ResNet。
+
+ResidualBlock 使用残差连接：
+
+```text
+F(x) + shortcut(x)
+```
+
+当主分支与 shortcut 的输入输出维度不一致时，使用 1×1 卷积进行维度匹配。
+
+模型包含四个残差阶段：
+
+```text
+64 → 128 → 256 → 512 channels
+```
+
+最后通过全局平均池化和全连接层输出 6 个垃圾类别的分类结果。
+
+## 5. 环境配置
+
+创建虚拟环境：
 
 ```powershell
-python --version
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-后续使用 `.venv` 中的 Python 运行项目；也可在编辑器中将其选择为 Python 解释器。
+激活虚拟环境：
 
-## 依赖说明
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
 
-`requirements.txt` 仅包含以下五个依赖，暂不固定版本：
+安装依赖：
 
-- `numpy`：数组与数值计算。
-- `pandas`：数据分析与表格处理。
-- `matplotlib`：数据与实验结果可视化。
-- `torch`：使用 PyTorch 手写 Residual Block、组装 ResNet，并完成训练、模型保存与预测。
-- `torchvision`：图像数据集与图片预处理工具。
+```powershell
+pip install -r requirements.txt
+```
 
-本次仅更新依赖清单，尚未安装依赖。
+`requirements-lock.txt` 保存项目开发环境中的完整依赖版本。
 
-## 目录使用约定
+## 6. 运行项目
 
-- 数据文件放入 `data/`，保留原始数据，避免直接覆盖。
-- 后续业务代码放入 `src/`。
-- 模型文件、图表、评估报告等实验产物放入 `outputs/`。
-- 虚拟环境、缓存、凭据及 `data/`、`outputs/` 中的内容默认不纳入 Git；两个目录中的 `.gitkeep` 除外。
-- API 密钥等敏感信息通过环境变量提供，不写入代码或 README。
+数据分析：
 
-## 后续待补充
+```powershell
+python .\src\data_analysis.py
+```
 
-后续按照上述考核目标实现业务功能，并补充数据来源、类别定义、运行命令、评估指标和实验结果。
+查看数据加载结果：
+
+```powershell
+python .\src\dataset.py
+```
+
+测试 ResNet 前向传播：
+
+```powershell
+python .\src\model.py
+```
+
+训练模型：
+
+```powershell
+python .\src\train.py
+```
+
+对新图片进行预测：
+
+```powershell
+python .\src\predict.py .\test_images\test.jpg
+```
+
+也可以替换为其他图片路径：
+
+```powershell
+python .\src\predict.py 图片路径
+```
+
+## 7. 实验结果
+
+本次训练使用：
+
+```text
+训练集：2022 张
+验证集：505 张
+```
+
+当前实验最佳验证准确率约为：
+
+```text
+44.75%
+```
+
+训练过程中会保存验证效果最好的模型：
+
+```text
+outputs/best_resnet.pth
+```
+
+并生成训练曲线：
+
+```text
+outputs/loss_curve.png
+outputs/accuracy_curve.png
+```
+
+在数据集之外的新塑料瓶图片上进行测试：
+
+```text
+Prediction: plastic
+```
+
+各类别概率：
+
+```text
+cardboard 11.80%
+glass      3.04%
+metal      20.50%
+paper      17.57%
+plastic    46.87%
+trash      0.21%
+```
+
+## 8. Git
+
+项目使用 Git 和 GitHub 进行版本管理，并在开发过程中持续提交代码，保留环境搭建、数据处理、模型实现、训练和预测等阶段的开发记录。
+
+GitHub Repository：
+
+```text
+https://github.com/3249702680-hub/lingjing
+```
+
+## 9. 说明
+
+本项目主体使用手写 ResNet 完成图像分类，同时学习了预训练模型和迁移学习的基本思想。
+
+迁移学习部分用于理解模型复用，不替代本项目的手写 ResNet。
